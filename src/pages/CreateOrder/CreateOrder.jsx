@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronDown, Search, Filter, List, Grid, MoreVertical, X, Minus, Plus, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
 
 const initialListProducts = [
-  { id: '#23454GH6J7YT6', name: 'Nike Club Pullover Fleece', category: 'Accessories', stock: 43, price: '$0.09', img: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=50&q=80', selected: true },
-  { id: '#23454GH6J7YT6', name: 'Russell Athletic 50/50 T-Shirt', category: 'Cream', stock: 0, price: '$0.20', img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=50&q=80', selected: false },
-  { id: '#23454GH6J7YT6', name: 'Nike Elite Crew Socks', category: 'Anesthesia', stock: 30, price: '$0.20', img: 'https://images.unsplash.com/photo-1581338834647-b0fb40704e21?w=50&q=80', selected: false },
-  { id: '#23454GH6J7YT6', name: 'Nike Academy20', category: 'Medications', stock: 50, price: '$0.04', img: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=50&q=80', selected: true },
-  { id: '#23454GH6J7YT6', name: 'BSN SPORTS Velocity', category: 'Anesthesia', stock: 10, price: '$0.00', img: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=50&q=80', selected: false },
-  { id: '#23454GH6J7YT6', name: 'Nike Dry Franchise Polo', category: 'Accessories', stock: 39, price: '-$0.14', img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=50&q=80', selected: false },
-  { id: '#23454GH6J7YT6', name: 'UA Locker Tee 2.0 Long Sleeve', category: 'Anesthesia', stock: 65, price: '$0.08', img: 'https://images.unsplash.com/photo-1581338834647-b0fb40704e21?w=50&q=80', selected: false },
-  { id: '#23454GH6J7YT6', name: 'Russell Athletic Core', category: 'Anesthesia', stock: 2, price: '$1.14', img: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=50&q=80', selected: false },
+  { id: 'list_1', name: 'Nike Club Pullover Fleece', category: 'Accessories', stock: 43, price: '$0.09', img: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=50&q=80', selected: true },
+  { id: 'list_2', name: 'Russell Athletic 50/50 T-Shirt', category: 'Cream', stock: 0, price: '$0.20', img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=50&q=80', selected: false },
+  { id: 'list_3', name: 'Nike Elite Crew Socks', category: 'Anesthesia', stock: 30, price: '$0.20', img: 'https://images.unsplash.com/photo-1581338834647-b0fb40704e21?w=50&q=80', selected: false },
+  { id: 'list_4', name: 'Nike Academy20', category: 'Medications', stock: 50, price: '$0.04', img: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=50&q=80', selected: true },
+  { id: 'list_5', name: 'BSN SPORTS Velocity', category: 'Anesthesia', stock: 10, price: '$0.00', img: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=50&q=80', selected: false },
+  { id: 'list_6', name: 'Nike Dry Franchise Polo', category: 'Accessories', stock: 39, price: '-$0.14', img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=50&q=80', selected: false },
+  { id: 'list_7', name: 'UA Locker Tee 2.0 Long Sleeve', category: 'Anesthesia', stock: 65, price: '$0.08', img: 'https://images.unsplash.com/photo-1581338834647-b0fb40704e21?w=50&q=80', selected: false },
+  { id: 'list_8', name: 'Russell Athletic Core', category: 'Anesthesia', stock: 2, price: '$1.14', img: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=50&q=80', selected: false },
 ];
 
 const initialGridProducts = [
@@ -26,10 +27,7 @@ const initialGridProducts = [
   { id: 10, name: 'Boutique Beauty', stock: 43, price: '$51.74', img: 'https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=300&q=80', tag: 'Women', selected: false },
 ];
 
-const cartItems = [
-  { id: 1, name: 'sunnah box & hampers', desc: 'Keep the soil evenly moist for the healthiest gro', price: '$70.00', qty: 5, img: 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=100&q=80' },
-  { id: 2, name: 'sunnah box & hampers', desc: 'Keep the soil evenly moist for the healthiest gro', price: '$70.00', qty: 5, img: 'https://images.unsplash.com/photo-1584208124888-3a20b9c799e2?w=100&q=80' },
-];
+
 
 export default function CreateOrder() {
   const [viewMode, setViewMode] = useState('list');
@@ -38,17 +36,37 @@ export default function CreateOrder() {
   const [listProducts, setListProducts] = useState(initialListProducts);
   const [gridProducts, setGridProducts] = useState(initialGridProducts);
 
+  const { cartItems, toggleCartItem, increaseQty, decreaseQty, removeFromCart } = useCart();
+  
   const toggleListProduct = (index) => {
-    const newProducts = [...listProducts];
-    newProducts[index].selected = !newProducts[index].selected;
-    setListProducts(newProducts);
+    const product = listProducts[index];
+    toggleCartItem({
+      ...product,
+      price: product.price, // ensure parsing price if needed later
+      desc: product.category
+    });
   };
 
   const toggleGridProduct = (id) => {
-    setGridProducts(gridProducts.map(product => 
-      product.id === id ? { ...product, selected: !product.selected } : product
-    ));
+    const product = gridProducts.find(p => p.id === id);
+    if(product) {
+      toggleCartItem({
+        ...product,
+        price: product.price,
+        desc: product.tag
+      });
+    }
   };
+
+  // derived selected state based on context
+  const derivedListProducts = listProducts.map(p => ({
+    ...p,
+    selected: cartItems.some(item => item.id === p.id)
+  }));
+  const derivedGridProducts = gridProducts.map(p => ({
+    ...p,
+    selected: cartItems.some(item => item.id === p.id)
+  }));
 
   return (
     <div className="flex flex-col h-full relative">
@@ -134,7 +152,7 @@ export default function CreateOrder() {
                     </tr>
                   </thead>
                   <tbody>
-                    {listProducts.map((item, idx) => (
+                    {derivedListProducts.map((item, idx) => (
                       <tr key={idx} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                         <td className="py-4 px-4">
                           <div 
@@ -172,7 +190,7 @@ export default function CreateOrder() {
 
               {/* Mobile Card List */}
               <div className="md:hidden space-y-3">
-                {listProducts.map((item, idx) => (
+                {derivedListProducts.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors">
                     <div 
                       onClick={() => toggleListProduct(idx)}
@@ -195,7 +213,7 @@ export default function CreateOrder() {
             </>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6 pb-6">
-              {gridProducts.map(item => (
+              {derivedGridProducts.map(item => (
                 <div 
                   key={item.id} 
                   onClick={() => toggleGridProduct(item.id)}
@@ -203,7 +221,7 @@ export default function CreateOrder() {
                 >
                   <div className="aspect-[4/3] relative">
                     <img src={item.img} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-brand-orange text-white text-[10px] sm:text-xs font-medium px-2 py-0.5 sm:py-1 rounded-md">
+                    <div className="absolute top-2 sm:top-3 left-2 sm:top-3 bg-brand-orange text-white text-[10px] sm:text-xs font-medium px-2 py-0.5 sm:py-1 rounded-md">
                       {item.tag}
                     </div>
                     <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
@@ -234,7 +252,7 @@ export default function CreateOrder() {
           <div className="flex justify-between items-center mb-6 sm:mb-8 border-b border-gray-100 pb-4">
             <div>
               <h2 className="text-lg sm:text-xl font-bold text-gray-900">Checkout</h2>
-              <p className="text-sm text-gray-500">2 items</p>
+              <p className="text-sm text-gray-500">{cartItems.length} items</p>
             </div>
             <button
               onClick={() => setIsCheckoutOpen(false)}
@@ -247,7 +265,10 @@ export default function CreateOrder() {
           <div className="flex-1 overflow-y-auto space-y-4 sm:space-y-6 pr-1 sm:pr-2">
             {cartItems.map(item => (
               <div key={item.id} className="flex gap-3 sm:gap-4 p-3 sm:p-4 border border-gray-100 rounded-2xl relative shadow-sm hover:shadow-md transition-shadow">
-                <button className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full">
+                <button 
+                  onClick={() => removeFromCart(item.id)}
+                  className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full"
+                >
                   <X className="w-4 h-4" />
                 </button>
                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
@@ -260,11 +281,17 @@ export default function CreateOrder() {
                     <p className="font-bold text-gray-900 text-sm">{item.price}</p>
                   </div>
                   <div className="flex items-center space-x-3 mt-2">
-                    <button className="w-6 h-6 rounded-md border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50">
+                    <button 
+                      onClick={() => decreaseQty(item.id)}
+                      className="w-6 h-6 rounded-md border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50"
+                    >
                       <Minus className="w-3 h-3" />
                     </button>
                     <span className="text-sm font-medium w-4 text-center">{item.qty}</span>
-                    <button className="w-6 h-6 rounded-md border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50">
+                    <button 
+                      onClick={() => increaseQty(item.id)}
+                      className="w-6 h-6 rounded-md border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50"
+                    >
                       <Plus className="w-3 h-3" />
                     </button>
                   </div>
@@ -276,7 +303,12 @@ export default function CreateOrder() {
           <div className="pt-4 sm:pt-6 border-t border-gray-100 mt-auto">
             <div className="flex justify-between items-center mb-4 sm:mb-6">
               <span className="text-gray-500 font-medium">subtotal</span>
-              <span className="text-xl sm:text-2xl font-bold text-gray-900">345 $</span>
+              <span className="text-xl sm:text-2xl font-bold text-gray-900">
+                ${cartItems.reduce((acc, item) => {
+                  const p = parseFloat(item.price.replace(/[^0-9.-]+/g,""));
+                  return acc + (isNaN(p) ? 0 : p * item.qty);
+                }, 0).toFixed(2)}
+              </span>
             </div>
             <button className="w-full py-3 sm:py-4 rounded-xl bg-brand-orange text-white font-bold text-base sm:text-lg hover:bg-orange-600 transition-colors shadow-lg shadow-orange-500/30">
               Checkout
